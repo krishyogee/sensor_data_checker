@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sensor Data Checker</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    #container {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    input, button {
+      margin-bottom: 10px;
+      padding: 5px;
+    }
+
+    button {
+      background-color: #333;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    #result {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>Sensor Data Checker</h1>
+    <div>
+      <label for="days">Number of Days:</label>
+      <input type="number" id="days" min="1" placeholder="Enter number of days">
+    </div>
+
+    <div id="sensorInputs"></div>
+
+    <button onclick="checkSensorData()">Check Data</button>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    function createSensorInputs() {
+      const days = document.getElementById('days').value;
+      const sensorInputs = document.getElementById('sensorInputs');
+      sensorInputs.innerHTML = '';
+
+      for (let i = 1; i <= 10; i++) {
+        for (let j = 1; j <= days; j++) {
+          const input = document.createElement('input');
+          input.type = 'number';
+          input.placeholder = `Sensor ${i}, Day ${j}`;
+          sensorInputs.appendChild(input);
+        }
+      }
+    }
+
+    function checkSensorData() {
+      const resultContainer = document.getElementById('result');
+      resultContainer.innerHTML = '';
+
+      
+      const upperRanges = [90, 80, 95, 70, 60, 85, 75, 50, 65, 55];
+      const lowerRanges = [10, 20, 15, 30, 40, 25, 35, 60, 45, 50];
+
+      const days = document.getElementById('days').value;
+      let isCritical = false;
+
+      for (let i = 1; i <= 10; i++) {
+        const sensorData = [];
+        for (let j = 1; j <= days; j++) {
+          const input = document.querySelector(`#sensorInputs input:nth-child(${(i - 1) * days + j})`);
+          sensorData.push(parseFloat(input.value));
+        }
+
+        const average = sensorData.reduce((acc, val) => acc + val, 0) / days;
+
+        const range = (upperRanges[i - 1] - lowerRanges[i - 1]) / 5;
+        const parts = [
+          lowerRanges[i - 1],
+          lowerRanges[i - 1] + range,
+          lowerRanges[i - 1] + 2 * range,
+          lowerRanges[i - 1] + 3 * range,
+          lowerRanges[i - 1] + 4 * range,
+          upperRanges[i - 1],
+        ];
+
+        let status = '';
+        if (average <= parts[0]) {
+          status = 'Excellent';
+        } else if (average <= parts[1]) {
+          status = 'Good';
+        } else if (average <= parts[2]) {
+          status = 'Normal';
+        } else if (average <= parts[3]) {
+          status = 'Bad';
+        } else {
+          status = 'Critical';
+          isCritical = true;
+        }
+
+        resultContainer.innerHTML += `<p>Sensor ${i} data is ${status}.</p>`;
+      }
+
+      if (!isCritical) {
+        resultContainer.innerHTML += '<p>All sensors are GOOD.</p>';
+      }
+    }
+
+    document.getElementById('days').addEventListener('input', createSensorInputs);
+  </script>
+</body>
+</html>
